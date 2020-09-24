@@ -1,0 +1,129 @@
+from tkinter import *
+from tkinter.messagebox import showinfo
+from tkinter.filedialog import askopenfilename, asksaveasfilename
+import os
+
+
+def getmeanning():
+    import wikipedia
+    result = wikipedia.summary(entryvalue.get())
+    showinfo("Meaning", result[0:600])
+
+
+def newfile():
+    global file
+    root.title("Text Transformer")
+    file = None
+    Textarea.delete(1.0, END)
+
+
+def openfile():
+    global file
+    file=askopenfilename(defaultextension=".txt", filetypes=[("All Files", "."), ("Text Document", "*.txt")])
+    if file == "":
+        file = None
+    else:
+        root.title(os.path.basename(file)+"- Notepad")
+        Textarea.delete(1.0, END)
+        f = open(file, "r")
+        Textarea.insert(1.0, f.read())
+        f.close()
+
+
+def savefile():
+    global file
+    if file == None:
+        file = asksaveasfilename(defaultexetension=".txt", filetypes=[("All Files", "."), ("Text Document", "*.txt")])
+        if file == "":
+            file = None
+        else:
+            f = open(file, "w")
+            f.write(Textarea.get(1.0, END))
+            f.close()
+            root.title(os.path.basename(file) + " - Notepad")
+            print("File Saved")
+    else:
+        f = open(file, "w")
+        f.write(Textarea.get(1.0, END))
+        f.close()
+
+
+def quitapp():
+    root.destroy()
+
+
+def cut():
+    Textarea.event_generate(("<<Cut>>"))
+
+
+def copy():
+    Textarea.event_generate(("<<Copy>>"))
+
+
+def paste():
+    Textarea.event_generate(("<<Paste>>"))
+
+
+def about():
+    showinfo("Notepad","Notepad by me")
+
+
+def dark():
+    Textarea.configure(bg="black", fg="green")
+
+
+def white():
+    Textarea.configure(bg="white", fg="black")
+
+
+if __name__ == '__main__':
+    root = Tk()
+    root.title("Untitled - Notepad")
+    #root.wm_iconbitmap("")
+    root.geometry("644x788")
+
+    frame = Frame(root, bg="gray")
+    entryvalue = StringVar()
+    Entry(frame, textvariable=entryvalue).pack(fill=Y, anchor=NE, side=RIGHT)
+    Button(frame, text="Meaning", bg="green", command=getmeanning).pack(side=RIGHT, anchor=NE)
+    frame.pack(side=TOP, fill=BOTH)
+
+    Textarea = Text(root, font="lucida 13")
+    file = None
+    Textarea.pack(expand=True, fill=BOTH)
+
+    Menubar = Menu(root)
+
+    FileMenu = Menu(Menubar, tearoff=0)
+    FileMenu.add_command(label="New", command=newfile)
+    FileMenu.add_command(label="open", command=openfile)
+    FileMenu.add_command(label="Save", command=savefile)
+    FileMenu.add_separator()
+    FileMenu.add_command(label="Exit", command=quitapp)
+    Menubar.add_cascade(label="File", menu=FileMenu)
+
+    EditMenu = Menu(Menubar, tearoff=0)
+    EditMenu.add_command(label="Cut", command=cut)
+    EditMenu.add_command(label="Copy", command=copy)
+    EditMenu.add_command(label="Paste", command=paste)
+    Menubar.add_cascade(label="Edit", menu=EditMenu)
+
+    HelpMenu = Menu(Menubar, tearoff=0)
+    HelpMenu.add_command(label="About Notepad", command=about)
+    Menubar.add_cascade(label="help", menu=HelpMenu)
+
+    Tools = Menu(Menubar, tearoff=0)
+    Themes=Menu(Tools, tearoff=0)
+    Themes.add_command(label="Dark Theme", command=dark)
+    Themes.add_command(label="White Theme", command=white)
+    Tools.add_cascade(label="Themes", menu=Themes)
+    Menubar.add_cascade(label="Tools", menu=Tools)
+
+    root.config(menu=Menubar)
+
+    Scroll = Scrollbar(Textarea)
+    Scroll.pack(side=RIGHT, fill=Y)
+    Scroll.config(command=Textarea.yview)
+    Textarea.configure(yscrollcommand=Scroll.set)
+
+    root.mainloop()
